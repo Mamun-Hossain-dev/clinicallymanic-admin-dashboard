@@ -21,6 +21,16 @@ import {
 import { X, Plus } from 'lucide-react'
 import { toast } from 'sonner'
 
+const FEATURE_OPTIONS = [
+  'PREMIUM_CONTENT',
+  'AI_CHAT_ACCESS',
+  'UNLIMITED_EVENTS',
+  'PRIORITY_SUPPORT',
+  'ADVANCED_ANALYTICS',
+  'CUSTOM_BRANDING',
+  'EXPORT_DATA',
+] as const
+
 /* ---------------- Types ---------------- */
 type Subscription = {
   _id: string
@@ -51,7 +61,8 @@ export default function EditSubscriptionModal({
   const [type, setType] = useState<'monthly' | 'yearly' | 'weekly'>('yearly')
   const [price, setPrice] = useState('')
   const [status, setStatus] = useState<'active' | 'inactive'>('active')
-  const [featureInput, setFeatureInput] = useState('')
+  const [featureInput, setFeatureInput] =
+    useState<(typeof FEATURE_OPTIONS)[number]>('PREMIUM_CONTENT')
   const [features, setFeatures] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(false)
 
@@ -62,16 +73,15 @@ export default function EditSubscriptionModal({
       setPrice(String(subscription.price))
       setStatus(subscription.status)
       setFeatures(subscription.features || [])
-      setFeatureInput('')
+      setFeatureInput('PREMIUM_CONTENT')
     }
   }, [subscription])
 
   const addFeature = () => {
-    if (!featureInput.trim()) return
-    if (!features.includes(featureInput.trim())) {
-      setFeatures([...features, featureInput.trim()])
+    if (!featureInput) return
+    if (!features.includes(featureInput)) {
+      setFeatures([...features, featureInput])
     }
-    setFeatureInput('')
   }
 
   const removeFeature = (feature: string) => {
@@ -96,18 +106,18 @@ export default function EditSubscriptionModal({
 
     try {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/subscription/${subscription._id}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/subscriptions/plans/${subscription._id}`,
         {
-          method: 'PUT',
+          method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
             name,
-            type,
+            interval: type.toUpperCase(),
             price: Number(price),
-            status,
+            isActive: status === 'active',
             features,
           }),
         },
@@ -245,25 +255,21 @@ export default function EditSubscriptionModal({
                   </span>
                 ))}
 
-                <input
+                <select
                   value={featureInput}
-                  onChange={e => setFeatureInput(e.target.value)}
-                  onKeyDown={e => {
-                    if (e.key === 'Enter' || e.key === ',') {
-                      e.preventDefault()
-                      addFeature()
-                    }
-                    if (
-                      e.key === 'Backspace' &&
-                      !featureInput &&
-                      features.length
-                    ) {
-                      setFeatures(features.slice(0, -1))
-                    }
-                  }}
-                  placeholder="Add feature"
-                  className="flex-1 min-w-[120px] bg-transparent text-sm outline-none placeholder-gray-400 text-white"
-                />
+                  onChange={e =>
+                    setFeatureInput(
+                      e.target.value as (typeof FEATURE_OPTIONS)[number],
+                    )
+                  }
+                  className="flex-1 min-w-[180px] bg-transparent text-sm outline-none text-white"
+                >
+                  {FEATURE_OPTIONS.map(feature => (
+                    <option key={feature} value={feature} className="bg-gray-800">
+                      {feature}
+                    </option>
+                  ))}
+                </select>
 
                 <button
                   type="button"
@@ -276,7 +282,7 @@ export default function EditSubscriptionModal({
             </div>
 
             <p className="text-xs text-gray-400">
-              Press Enter, comma, Backspace or click + to manage features
+              Select from backend-supported feature flags and click +
             </p>
           </div>
         </div>

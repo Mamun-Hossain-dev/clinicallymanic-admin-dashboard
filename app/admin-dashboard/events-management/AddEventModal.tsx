@@ -75,13 +75,13 @@ export default function AddEventModal({ open, onClose }: AddEventModalProps) {
                 title,
                 description,
                 location,
-                status,
-                date: new Date(date).toISOString(), // convert to ISO string
+                status: status.toUpperCase(),
+                date: new Date(date).toISOString(),
             }
 
             formData.append("data", JSON.stringify(eventData))
 
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/event`, {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/events`, {
                 method: "POST",
                 headers: {
                     Authorization: `Bearer ${token}`,

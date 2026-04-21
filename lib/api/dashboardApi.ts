@@ -2,7 +2,7 @@
 // File: lib/api/dashboardApi.ts
 // ============================================
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'
 
 export interface DashboardOverview {
   totalRevenue: number
@@ -47,7 +47,7 @@ interface ApiResponse<T> {
 }
 
 const getOverview = async (token: string): Promise<DashboardOverview> => {
-  const response = await fetch(`${API_URL}/dashboard`, {
+  const response = await fetch(`${API_URL}/dashboard/overview`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
@@ -59,8 +59,13 @@ const getOverview = async (token: string): Promise<DashboardOverview> => {
     throw new Error('Failed to fetch dashboard overview')
   }
 
-  const result: ApiResponse<DashboardOverview> = await response.json()
-  return result.data
+  const result: ApiResponse<any> = await response.json()
+  return {
+    totalRevenue: result.data.totalRevenue,
+    totalUser: result.data.totalUsers,
+    subscriptionRevenue: result.data.subscriptionRevenue,
+    shopRevenue: result.data.shopRevenue,
+  }
 }
 
 const getRevenueOverview = async (
@@ -82,29 +87,38 @@ const getRevenueOverview = async (
     throw new Error('Failed to fetch revenue overview')
   }
 
-  const result: ApiResponse<RevenueData[]> = await response.json()
-  return result.data
+  const result: ApiResponse<{ month: string; value: number }[]> = await response.json()
+  return result.data.map(item => ({
+    month: item.month,
+    revenue: item.value,
+  }))
 }
 
 const getUserGrowth = async (token: string): Promise<UserGrowthData[]> => {
-  const response = await fetch(`${API_URL}/dashboard/user-growth`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
+  const response = await fetch(
+    `${API_URL}/dashboard/user-growth?year=${new Date().getFullYear()}`,
+    {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
     },
-  })
+  )
 
   if (!response.ok) {
     throw new Error('Failed to fetch user growth data')
   }
 
-  const result: ApiResponse<UserGrowthData[]> = await response.json()
-  return result.data
+  const result: ApiResponse<{ month: string; value: number }[]> = await response.json()
+  return result.data.map(item => ({
+    month: item.month,
+    users: item.value,
+  }))
 }
 
 const getLatestContacts = async (token: string): Promise<Contact[]> => {
-  const response = await fetch(`${API_URL}/contact?page=1&limit=4`, {
+  const response = await fetch(`${API_URL}/contacts?page=1&limit=4`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
@@ -116,8 +130,19 @@ const getLatestContacts = async (token: string): Promise<Contact[]> => {
     throw new Error('Failed to fetch latest contacts')
   }
 
-  const result: ApiResponse<Contact[]> = await response.json()
-  return result.data
+  const result: ApiResponse<any[]> = await response.json()
+  return result.data.map(contact => ({
+    _id: contact.id,
+    name: contact.name,
+    email: contact.email,
+    phoneNumber: contact.phoneNumber,
+    occupation: contact.occupation,
+    subject: contact.subject,
+    message: contact.message,
+    isRead: contact.isRead,
+    createdAt: contact.createdAt,
+    updatedAt: contact.updatedAt,
+  }))
 }
 
 export const dashboardApi = {

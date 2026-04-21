@@ -91,37 +91,45 @@ export const ContentFormModal = ({
     e.preventDefault()
     const data = new FormData()
 
-    data.append('title', formData.title)
-    data.append('category', formData.category)
-    data.append('contentType', activeTab)
-
     if (formData.thumbnail) {
       data.append('thumbnail', formData.thumbnail)
     }
 
-    // Prepare media data based on active tab
-    const mediaData: any = {}
+    if (content) {
+      data.append('title', formData.title)
+      data.append('category', formData.category)
 
-    if (activeTab === 'article') {
-      mediaData.type = 'article'
-      mediaData.data = {
-        description: formData.articleDescription,
+      if (activeTab === 'article') {
+        data.append('description', formData.articleDescription)
+        data.append('body', formData.articleDescription)
+      } else if (activeTab === 'Youtube-videos') {
+        data.append('description', formData.videoDescription)
+        data.append('videoUrl', formData.videoUrl)
+      } else if (activeTab === 'Spotify-audios') {
+        data.append('description', formData.spotifyDescription)
+        data.append('audioUrl', formData.previewUrl)
       }
-    } else if (activeTab === 'Youtube-videos') {
-      mediaData.type = 'youtube'
-      mediaData.data = {
-        videourl: formData.videoUrl,
-        description: formData.videoDescription,
-      }
-    } else if (activeTab === 'Spotify-audios') {
-      mediaData.type = 'spotify'
-      mediaData.data = {
-        previewurl: formData.previewUrl,
-        description: formData.spotifyDescription,
+    } else {
+      if (activeTab === 'article') {
+        data.append('type', 'ARTICLE')
+        data.append('title', formData.title)
+        data.append('category', formData.category)
+        data.append('description', formData.articleDescription)
+        data.append('body', formData.articleDescription)
+      } else if (activeTab === 'Youtube-videos') {
+        data.append('type', 'YOUTUBE')
+        data.append('title', formData.title)
+        data.append('category', formData.category)
+        data.append('description', formData.videoDescription)
+        data.append('videoUrl', formData.videoUrl)
+      } else if (activeTab === 'Spotify-audios') {
+        data.append('type', 'SPOTIFY')
+        data.append('title', formData.title)
+        data.append('category', formData.category)
+        data.append('description', formData.spotifyDescription)
+        data.append('audioUrl', formData.previewUrl)
       }
     }
-
-    data.append('media', JSON.stringify([mediaData]))
 
     onSubmit(data)
   }

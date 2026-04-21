@@ -30,11 +30,10 @@ const authOptions: AuthOptions = {
           if (!res.ok || !data?.data?.accessToken) return null
 
           return {
-            id: data.data.user._id,
+            id: data.data.user.id,
             email: data.data.user.email,
             role: data.data.user.role,
             accessToken: data.data.accessToken,
-            refreshToken: data.data.refreshToken,
             profileImage: data.data.user.profileImage,
           }
         } catch (error) {

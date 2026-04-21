@@ -20,6 +20,7 @@ import { PasswordForm } from './passwordForm'
 export default function SettingsPage() {
   const { data: session, update: updateSession } = useSession()
   const accessToken = session?.user?.accessToken || ''
+  const userId = session?.user?.id
 
   const [activeTab, setActiveTab] = useState<'profile' | 'password'>('profile')
 
@@ -42,13 +43,13 @@ export default function SettingsPage() {
     data: profileData,
     isLoading: profileLoading,
     refetch: refetchProfile,
-  } = useGetUserProfile(accessToken)
+  } = useGetUserProfile(accessToken, userId)
 
   console.log('Profile data', profileData)
   console.log('profile image', profileImage)
 
   const { mutate: updateProfile, isPending: isUpdatingProfile } =
-    useUpdateProfile(accessToken, {
+    useUpdateProfile(accessToken, userId, {
       onSuccess: async () => {
         toast.success('Profile updated successfully ✅')
         await refetchProfile()
@@ -59,7 +60,7 @@ export default function SettingsPage() {
     })
 
   const { mutate: updateProfileImage, isPending: isUpdatingImage } =
-    useUpdateProfileImage(accessToken, {
+    useUpdateProfileImage(accessToken, userId, {
       onSuccess: async () => {
         toast.success('Profile image updated successfully ✅')
         setImageFile(null)

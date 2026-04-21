@@ -39,11 +39,23 @@ export default function EventsTable() {
     enabled: !!token,
     queryFn: async () => {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/event?page=${page}&limit=${limit}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/events?page=${page}&limit=${limit}`,
         { headers: { Authorization: `Bearer ${token}` } }
       )
       if (!res.ok) throw new Error('Failed to fetch events')
-      return res.json()
+      const result = await res.json()
+      return {
+        ...result,
+        data: result.data.map((event: any) => ({
+          _id: event.id,
+          title: event.title,
+          description: event.description,
+          location: event.location,
+          date: event.date,
+          status: event.status.toLowerCase(),
+          thumbnail: event.thumbnailUrl || '',
+        })),
+      }
     },
   })
 
@@ -51,7 +63,7 @@ export default function EventsTable() {
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/event/${id}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/events/${id}`,
         { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } }
       )
       if (!res.ok) throw new Error('Delete failed')

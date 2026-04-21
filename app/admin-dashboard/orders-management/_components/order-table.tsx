@@ -7,7 +7,7 @@ import Image from 'next/image'
 interface BookingTableProps {
   bookings: Booking[]
   onView: (booking: Booking) => void
-  onDelete: (booking: Booking) => void
+  onDelete?: (booking: Booking) => void
   onStatusChange: (booking: Booking, status: string) => void
 }
 
@@ -151,13 +151,15 @@ export const BookingTable = ({
                   >
                     <Eye className="h-5 w-5 text-gray-400" />
                   </button>
-                  <button
-                    onClick={() => onDelete(booking)}
-                    className="p-2 hover:bg-gray-700 rounded transition-colors"
-                    title="Delete"
-                  >
-                    <Trash2 className="h-5 w-5 text-red-400" />
-                  </button>
+                  {onDelete && (
+                    <button
+                      onClick={() => onDelete(booking)}
+                      className="p-2 hover:bg-gray-700 rounded transition-colors"
+                      title="Delete"
+                    >
+                      <Trash2 className="h-5 w-5 text-red-400" />
+                    </button>
+                  )}
                 </div>
               </td>
             </tr>

@@ -84,14 +84,14 @@ export default function EditEventModal({ open, onClose, event, token, onUpdated 
         title,
         description,
         location,
-        status,
+        status: status.toUpperCase(),
         date: new Date(date).toISOString(),
       }
 
       formData.append("data", JSON.stringify(eventData))
 
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/event/${event._id}`, {
-        method: "PUT",
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/events/${event._id}`, {
+        method: "PATCH",
         headers: {
           Authorization: `Bearer ${token}`,
           // DO NOT set Content-Type – let browser set multipart boundary

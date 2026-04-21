@@ -23,6 +23,16 @@ import { toast } from 'sonner'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useSession } from 'next-auth/react'
 
+const FEATURE_OPTIONS = [
+  'PREMIUM_CONTENT',
+  'AI_CHAT_ACCESS',
+  'UNLIMITED_EVENTS',
+  'PRIORITY_SUPPORT',
+  'ADVANCED_ANALYTICS',
+  'CUSTOM_BRANDING',
+  'EXPORT_DATA',
+] as const
+
 export default function AddSubscriptionModal({
   open,
   onClose,
@@ -34,7 +44,8 @@ export default function AddSubscriptionModal({
   const [type, setType] = useState('monthly')
   const [price, setPrice] = useState('')
   const [status, setStatus] = useState('active')
-  const [featureInput, setFeatureInput] = useState('')
+  const [featureInput, setFeatureInput] =
+    useState<(typeof FEATURE_OPTIONS)[number]>('PREMIUM_CONTENT')
   const [features, setFeatures] = useState<string[]>([])
   const { data: session } = useSession()
   const token = (session?.user as { accessToken?: string })?.accessToken
@@ -43,13 +54,16 @@ export default function AddSubscriptionModal({
   const createPlan = useMutation({
     mutationFn: async (body: {
       name: string
-      type: string
+      interval: string
       price: number
-      status: string
+      isActive: boolean
       features: string[]
+      currency: string
+      intervalCount: number
+      trialDays: number
     }) => {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/subscription`,
+        `${process.env.NEXT_PUBLIC_API_URL}/subscriptions/plans`,
         {
           method: 'POST',
           headers: {
@@ -86,7 +100,7 @@ export default function AddSubscriptionModal({
     setType('monthly')
     setPrice('')
     setStatus('active')
-    setFeatureInput('')
+    setFeatureInput('PREMIUM_CONTENT')
     setFeatures([])
   }
 
@@ -95,9 +109,8 @@ export default function AddSubscriptionModal({
   }
 
   const addFeature = () => {
-    if (featureInput.trim() && !features.includes(featureInput.trim())) {
-      setFeatures([...features, featureInput.trim()])
-      setFeatureInput('')
+    if (featureInput && !features.includes(featureInput)) {
+      setFeatures([...features, featureInput])
     }
   }
 
@@ -120,10 +133,13 @@ export default function AddSubscriptionModal({
 
     createPlan.mutate({
       name,
-      type,
+      interval: type.toUpperCase(),
       price: Number(price),
-      status,
+      isActive: status === 'active',
       features,
+      currency: 'usd',
+      intervalCount: 1,
+      trialDays: name === 'basic' ? 7 : 0,
     })
   }
 
@@ -248,26 +264,21 @@ export default function AddSubscriptionModal({
                 ))}
 
                 {/* Input */}
-                <input
+                <select
                   value={featureInput}
-                  onChange={e => setFeatureInput(e.target.value)}
-                  onKeyDown={e => {
-                    if (e.key === 'Enter' || e.key === ',') {
-                      e.preventDefault()
-                      addFeature()
-                    }
-
-                    if (
-                      e.key === 'Backspace' &&
-                      !featureInput &&
-                      features.length
-                    ) {
-                      setFeatures(features.slice(0, -1))
-                    }
-                  }}
-                  placeholder="Add feature"
-                  className="flex-1 min-w-[140px] bg-transparent text-sm outline-none placeholder-gray-400 text-white"
-                />
+                  onChange={e =>
+                    setFeatureInput(
+                      e.target.value as (typeof FEATURE_OPTIONS)[number],
+                    )
+                  }
+                  className="flex-1 min-w-[180px] bg-transparent text-sm outline-none text-white"
+                >
+                  {FEATURE_OPTIONS.map(feature => (
+                    <option key={feature} value={feature} className="bg-gray-800">
+                      {feature}
+                    </option>
+                  ))}
+                </select>
 
                 {/* Plus icon */}
                 <button
@@ -284,7 +295,7 @@ export default function AddSubscriptionModal({
             </div>
 
             <p className="text-xs text-gray-400">
-              Press Enter, comma, Backspace or click + to manage features
+              Select from backend-supported feature flags and click +
             </p>
           </div>
         </div>

@@ -18,3 +18,9 @@ export interface Shop {
   createdAt?: string
   updatedAt?: string
 }
+
+export interface PaginationMeta {
+  total: number
+  page: number
+  limit: number
+}
