@@ -1,0 +1,267 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: oklch(0.98 0 0);
+  --foreground: oklch(0.15 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.15 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.15 0 0);
+  --primary: oklch(0.55 0.25 280);
+  --primary-foreground: oklch(0.98 0 0);
+  --secondary: oklch(0.95 0 0);
+  --secondary-foreground: oklch(0.15 0 0);
+  --muted: oklch(0.96 0 0);
+  --muted-foreground: oklch(0.45 0 0);
+  --accent: oklch(0.95 0 0);
+  --accent-foreground: oklch(0.15 0 0);
+  --destructive: oklch(0.55 0.22 25);
+  --destructive-foreground: oklch(0.98 0 0);
+  --border: oklch(0.9 0 0);
+  --input: oklch(0.9 0 0);
+  --ring: oklch(0.55 0.25 280);
+  --radius: 0.5rem;
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.15 0 0);
+}
+
+.dark {
+  --background: oklch(0.12 0.01 280);
+  --foreground: oklch(0.95 0 0);
+  --card: oklch(0.15 0.01 280);
+  --card-foreground: oklch(0.95 0 0);
+  --popover: oklch(0.14 0.01 280);
+  --popover-foreground: oklch(0.95 0 0);
+  --primary: oklch(0.65 0.26 285);
+  --primary-foreground: oklch(0.98 0 0);
+  --secondary: oklch(0.22 0.02 280);
+  --secondary-foreground: oklch(0.95 0 0);
+  --muted: oklch(0.2 0.02 280);
+  --muted-foreground: oklch(0.6 0 0);
+  --accent: oklch(0.22 0.02 280);
+  --accent-foreground: oklch(0.95 0 0);
+  --destructive: oklch(0.55 0.22 25);
+  --destructive-foreground: oklch(0.98 0 0);
+  --border: oklch(0.25 0.02 280);
+  --input: oklch(0.25 0.02 280);
+  --ring: oklch(0.65 0.26 285);
+  --sidebar: oklch(0.13 0.01 280);
+  --sidebar-foreground: oklch(0.95 0 0);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-size: 16px;
+  }
+
+  table {
+    @apply text-foreground;
+  }
+
+  th {
+    @apply text-foreground font-medium;
+  }
+
+  td {
+    @apply text-foreground;
+  }
+
+  /* Button fix for dark mode */
+  button {
+    @apply text-foreground;
+  }
+}
+
+/* Custom Scrollbar - Black / Gray & Transparent */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+  margin: 8px 0;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #2f2f2f 0%, #6b6b6b 100%);
+  border-radius: 10px;
+  transition: background 0.3s ease;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #1f1f1f 0%, #4b4b4b 100%);
+}
+
+/* Set min height for editor */
+.quill-editor .ql-container {
+  min-height: 240px; /* total editor height including toolbar */
+}
+
+.quill-editor .ql-editor {
+  min-height: 200px; /* editable content area */
+  overflow-y: auto; /* scroll if content is long */
+}
+
+/* Firefox Support */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #4b4b4b transparent;
+}
+
+/* Horizontal Scrollbar Variant */
+.custom-scrollbar-horizontal::-webkit-scrollbar {
+  height: 6px;
+}
+
+.custom-scrollbar-horizontal::-webkit-scrollbar-track {
+  background: transparent;
+  margin: 0 8px;
+}
+
+.custom-scrollbar-horizontal::-webkit-scrollbar-thumb {
+  background: linear-gradient(90deg, #2f2f2f 0%, #6b6b6b 100%);
+  border-radius: 10px;
+  transition: background 0.3s ease;
+}
+
+.custom-scrollbar-horizontal::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(90deg, #1f1f1f 0%, #4b4b4b 100%);
+}
+
+/* Dark Variant (Pure Dark Gray) */
+.custom-scrollbar-dark::-webkit-scrollbar-thumb {
+  background: #3a3a3a;
+}
+
+.custom-scrollbar-dark::-webkit-scrollbar-thumb:hover {
+  background: #2a2a2a;
+}
+
+.custom-scrollbar-dark {
+  scrollbar-width: thin;
+  scrollbar-color: #3a3a3a transparent;
+}
+
+/* ============================================
+   File: app/globals.css or styles/tiptap.css
+   ============================================ */
+
+/* Add this to your global CSS file */
+
+/* Tiptap Editor Styles */
+.ProseMirror {
+  outline: none;
+  min-height: 200px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: #6b7280;
+  pointer-events: none;
+  height: 0;
+}
+
+/* Prose styles for dark mode */
+.prose-invert {
+  color: #e5e7eb;
+}
+
+.prose-invert h1,
+.prose-invert h2,
+.prose-invert h3,
+.prose-invert h4,
+.prose-invert h5,
+.prose-invert h6 {
+  color: #f9fafb;
+  font-weight: 600;
+  margin-top: 1em;
+  margin-bottom: 0.5em;
+}
+
+.prose-invert h2 {
+  font-size: 1.5em;
+  line-height: 1.3333333;
+}
+
+.prose-invert p {
+  margin-top: 0.75em;
+  margin-bottom: 0.75em;
+  line-height: 1.625;
+}
+
+.prose-invert strong {
+  color: #f9fafb;
+  font-weight: 600;
+}
+
+.prose-invert code {
+  color: #f9fafb;
+  background-color: #374151;
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+  font-size: 0.875em;
+}
+
+.prose-invert blockquote {
+  border-left: 0.25rem solid #4b5563;
+  padding-left: 1em;
+  font-style: italic;
+  color: #d1d5db;
+  margin: 1em 0;
+}
+
+.prose-invert ul,
+.prose-invert ol {
+  padding-left: 1.5em;
+  margin: 0.75em 0;
+}
+
+.prose-invert ul {
+  list-style-type: disc;
+}
+
+.prose-invert ol {
+  list-style-type: decimal;
+}
+
+.prose-invert li {
+  margin: 0.25em 0;
+}
+
+.prose-invert a {
+  color: #60a5fa;
+  text-decoration: underline;
+}
+
+.prose-invert a:hover {
+  color: #93c5fd;
+}
+
+/* Scrollbar styling for editor */
+.ProseMirror::-webkit-scrollbar {
+  width: 8px;
+}
+
+.ProseMirror::-webkit-scrollbar-track {
+  background: #1f2937;
+  border-radius: 4px;
+}
+
+.ProseMirror::-webkit-scrollbar-thumb {
+  background: #4b5563;
+  border-radius: 4px;
+}
+
+.ProseMirror::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
+}
