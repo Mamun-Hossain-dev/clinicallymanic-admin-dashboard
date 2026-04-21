@@ -116,15 +116,15 @@ export default function EditOfferModal({
         description,
         discount: discountNum,
         validUntil: new Date(validUntil).toISOString(),
-        status,
+        status: status.toUpperCase(),
       }
 
       formData.append('data', JSON.stringify(offerData))
 
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/offer/${offer._id}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/offers/${offer._id}`,
         {
-          method: 'PUT',
+          method: 'PATCH',
           headers: {
             Authorization: `Bearer ${token}`,
           },

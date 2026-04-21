@@ -98,12 +98,12 @@ export default function AddOfferModal({
         description,
         discount: discountNum,
         validUntil: new Date(validUntil).toISOString(),
-        status,
+        status: status.toUpperCase(),
       }
 
       formData.append('data', JSON.stringify(offerData))
 
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/offer`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/offers`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,

@@ -39,11 +39,23 @@ export default function OffersTable() {
     enabled: !!token,
     queryFn: async () => {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/offer?page=${page}&limit=${limit}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/offers?page=${page}&limit=${limit}`,
         { headers: { Authorization: `Bearer ${token}` } },
       )
       if (!res.ok) throw new Error('Failed to fetch offers')
-      return res.json()
+      const result = await res.json()
+      return {
+        ...result,
+        data: result.data.map((offer: any) => ({
+          _id: offer.id,
+          title: offer.title,
+          description: offer.description,
+          discount: offer.discount,
+          validUntil: offer.validUntil,
+          status: offer.status.toLowerCase(),
+          thumbnail: offer.thumbnailUrl || '',
+        })),
+      }
     },
   })
 
@@ -51,7 +63,7 @@ export default function OffersTable() {
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/offer/${id}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/offers/${id}`,
         { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } },
       )
       if (!res.ok) throw new Error('Delete failed')

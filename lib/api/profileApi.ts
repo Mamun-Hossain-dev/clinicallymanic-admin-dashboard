@@ -45,30 +45,41 @@ async function handleResponse<T>(response: Response): Promise<T> {
 }
 
 // ==================== GET USER PROFILE ====================
-export const useGetUserProfile = (accessToken: string) => {
+export const useGetUserProfile = (accessToken: string, userId?: string) => {
   return useQuery<ProfileResponse>({
-    queryKey: ['user-profile'],
+    queryKey: ['user-profile', userId],
     queryFn: async () => {
-      const res = await fetch(`${API_BASE_URL}/user/profile`, {
+      const res = await fetch(`${API_BASE_URL}/users/${userId}`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
       })
 
-      return handleResponse<ProfileResponse>(res)
+      const response = await handleResponse<ProfileResponse>(res)
+      return {
+        ...response,
+        data: {
+          ...response.data,
+          _id: response.data._id || (response.data as any).id,
+        },
+      }
     },
-    enabled: !!accessToken,
+    enabled: !!accessToken && !!userId,
   })
 }
 
 // ==================== UPDATE PROFILE ====================
-export const useUpdateProfile = (accessToken: string, options?: any) => {
+export const useUpdateProfile = (
+  accessToken: string,
+  userId?: string,
+  options?: any,
+) => {
   const queryClient = useQueryClient()
 
   return useMutation({
     mutationFn: async (data: UpdateProfileData) => {
-      const res = await fetch(`${API_BASE_URL}/user/profile`, {
-        method: 'PUT',
+      const res = await fetch(`${API_BASE_URL}/users/${userId}`, {
+        method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${accessToken}`,
@@ -89,20 +100,31 @@ export const useUpdateProfile = (accessToken: string, options?: any) => {
 }
 
 // ==================== UPDATE PROFILE IMAGE ====================
-export const useUpdateProfileImage = (accessToken: string, options?: any) => {
+export const useUpdateProfileImage = (
+  accessToken: string,
+  userId?: string,
+  options?: any,
+) => {
   const queryClient = useQueryClient()
 
   return useMutation({
     mutationFn: async (formData: FormData) => {
-      const res = await fetch(`${API_BASE_URL}/user/profile`, {
-        method: 'PUT',
+      const res = await fetch(`${API_BASE_URL}/users/${userId}`, {
+        method: 'PATCH',
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
         body: formData,
       })
 
-      return handleResponse<ProfileResponse>(res)
+      const response = await handleResponse<ProfileResponse>(res)
+      return {
+        ...response,
+        data: {
+          ...response.data,
+          _id: response.data._id || (response.data as any).id,
+        },
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['user-profile'] })

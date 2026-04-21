@@ -2,7 +2,7 @@
 // File: lib/api/contentApi.ts
 // ============================================
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'
 
 export interface ContentMedia {
   type: 'youtube' | 'spotify' | 'article'
@@ -12,7 +12,7 @@ export interface ContentMedia {
     description?: string
     body?: string
   }
-  _id: string
+  _id?: string
 }
 
 export interface Content {
@@ -39,6 +39,53 @@ interface ApiResponse<T> {
   }
 }
 
+type BackendContent = {
+  id: string
+  category: string
+  type: 'ARTICLE' | 'YOUTUBE' | 'SPOTIFY'
+  title: string
+  description: string
+  thumbnailUrl?: string | null
+  body?: string | null
+  videoUrl?: string | null
+  audioUrl?: string | null
+  createdById: string
+  createdAt: string
+  updatedAt: string
+}
+
+const normalizeContent = (content: BackendContent): Content => ({
+  _id: content.id,
+  category: content.category,
+  contentType:
+    content.type === 'ARTICLE'
+      ? 'article'
+      : content.type === 'YOUTUBE'
+        ? 'Youtube-videos'
+        : 'Spotify-audios',
+  title: content.title,
+  thumbnail: content.thumbnailUrl || '',
+  media: [
+    {
+      type:
+        content.type === 'ARTICLE'
+          ? 'article'
+          : content.type === 'YOUTUBE'
+            ? 'youtube'
+            : 'spotify',
+      data:
+        content.type === 'ARTICLE'
+          ? { body: content.body || '', description: content.description }
+          : content.type === 'YOUTUBE'
+            ? { videourl: content.videoUrl || '', description: content.description }
+            : { previewurl: content.audioUrl || '', description: content.description },
+    },
+  ],
+  createdBy: content.createdById,
+  createdAt: content.createdAt,
+  updatedAt: content.updatedAt,
+})
+
 const getAll = async (
   page: number,
   limit: number,
@@ -46,9 +93,19 @@ const getAll = async (
   category?: string,
   token?: string,
 ): Promise<ApiResponse<Content[]>> => {
-  let url = `${API_URL}/content?page=${page}&limit=${limit}`
+  let url = `${API_URL}/contents?page=${page}&limit=${limit}`
 
-  if (contentType) url += `&contentType=${contentType}`
+  if (contentType) {
+    const mappedType =
+      contentType === 'article'
+        ? 'ARTICLE'
+        : contentType === 'Youtube-videos'
+          ? 'YOUTUBE'
+          : contentType === 'Spotify-audios'
+            ? 'SPOTIFY'
+            : contentType
+    url += `&type=${mappedType}`
+  }
   if (category) url += `&category=${category}`
 
   const headers: HeadersInit = {
@@ -68,7 +125,11 @@ const getAll = async (
     throw new Error('Failed to fetch content')
   }
 
-  return response.json()
+  const result: ApiResponse<BackendContent[]> = await response.json()
+  return {
+    ...result,
+    data: result.data.map(normalizeContent),
+  }
 }
 
 const getSingle = async (id: string, token?: string): Promise<Content> => {
@@ -80,7 +141,7 @@ const getSingle = async (id: string, token?: string): Promise<Content> => {
     headers.Authorization = `Bearer ${token}`
   }
 
-  const response = await fetch(`${API_URL}/content/${id}`, {
+  const response = await fetch(`${API_URL}/contents/${id}`, {
     method: 'GET',
     headers,
   })
@@ -89,12 +150,12 @@ const getSingle = async (id: string, token?: string): Promise<Content> => {
     throw new Error('Failed to fetch content')
   }
 
-  const result: ApiResponse<Content> = await response.json()
-  return result.data
+  const result: ApiResponse<BackendContent> = await response.json()
+  return normalizeContent(result.data)
 }
 
 const create = async (formData: FormData, token: string): Promise<Content> => {
-  const response = await fetch(`${API_URL}/content`, {
+  const response = await fetch(`${API_URL}/contents`, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${token}`,
@@ -106,8 +167,8 @@ const create = async (formData: FormData, token: string): Promise<Content> => {
     throw new Error('Failed to create content')
   }
 
-  const result: ApiResponse<Content> = await response.json()
-  return result.data
+  const result: ApiResponse<BackendContent> = await response.json()
+  return normalizeContent(result.data)
 }
 
 const update = async (
@@ -115,8 +176,8 @@ const update = async (
   formData: FormData,
   token: string,
 ): Promise<Content> => {
-  const response = await fetch(`${API_URL}/content/${id}`, {
-    method: 'PUT',
+  const response = await fetch(`${API_URL}/contents/${id}`, {
+    method: 'PATCH',
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -127,12 +188,12 @@ const update = async (
     throw new Error('Failed to update content')
   }
 
-  const result: ApiResponse<Content> = await response.json()
-  return result.data
+  const result: ApiResponse<BackendContent> = await response.json()
+  return normalizeContent(result.data)
 }
 
 const deleteContent = async (id: string, token: string): Promise<void> => {
-  const response = await fetch(`${API_URL}/content/${id}`, {
+  const response = await fetch(`${API_URL}/contents/${id}`, {
     method: 'DELETE',
     headers: {
       Authorization: `Bearer ${token}`,

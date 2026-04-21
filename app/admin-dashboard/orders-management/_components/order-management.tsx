@@ -16,7 +16,6 @@ import { TableSkeleton } from '@/components/common/tableSkeleton'
 import { NoDataFound } from '@/components/common/no-data-found'
 
 import { Pagination } from '@/components/common/table-pagination'
-import { DeleteModal } from '@/components/common/delete-modal'
 
 import { Input } from '@/components/ui/input'
 import { Booking } from '@/types/orders'
@@ -34,11 +33,9 @@ export default function OrdersManagementPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
 
-  const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [showViewModal, setShowViewModal] = useState(false)
 
   const [viewingBooking, setViewingBooking] = useState<Booking | null>(null)
-  const [deletingBooking, setDeletingBooking] = useState<Booking | null>(null)
 
   /* =======================
      Fetch Bookings
@@ -63,21 +60,6 @@ export default function OrdersManagementPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['bookings'] })
-    },
-  })
-
-  /* =======================
-     Delete
-  ======================= */
-  const deleteMutation = useMutation({
-    mutationFn: (id: string) => {
-      if (!token) throw new Error('Unauthorized')
-      return bookingApi.delete(id, token)
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['bookings'] })
-      setShowDeleteModal(false)
-      setDeletingBooking(null)
     },
   })
 
@@ -196,10 +178,6 @@ export default function OrdersManagementPage() {
                 setViewingBooking(booking)
                 setShowViewModal(true)
               }}
-              onDelete={booking => {
-                setDeletingBooking(booking)
-                setShowDeleteModal(true)
-              }}
               onStatusChange={handleStatusChange}
             />
 
@@ -214,16 +192,6 @@ export default function OrdersManagementPage() {
           </>
         )}
       </div>
-
-      {/* Modals */}
-      <DeleteModal
-        isOpen={showDeleteModal}
-        onClose={() => setShowDeleteModal(false)}
-        onConfirm={() =>
-          deletingBooking && deleteMutation.mutate(deletingBooking._id)
-        }
-        title={`Order #${deletingBooking?._id.slice(-8)}`}
-      />
 
       <BookingViewModal
         isOpen={showViewModal}

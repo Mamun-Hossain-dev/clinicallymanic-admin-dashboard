@@ -50,7 +50,7 @@ export default function SubscriptionPlansTable() {
     enabled: !!token,
     queryFn: async () => {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/subscription?page=${page}&limit=${limit}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/subscriptions/plans?page=${page}&limit=${limit}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -59,7 +59,22 @@ export default function SubscriptionPlansTable() {
         },
       )
       if (!res.ok) throw new Error('Failed to fetch subscriptions')
-      return res.json()
+      const result = await res.json()
+      return {
+        ...result,
+        data: result.data.map((plan: any) => ({
+          _id: plan.id,
+          name: plan.name,
+          type: plan.interval.toLowerCase(),
+          price: Number(plan.price),
+          status: plan.isActive ? 'active' : 'inactive',
+          features: plan.features || [],
+          totalSubscribedUsers: Array.from(
+            { length: plan._count?.subscriptions ?? 0 },
+            () => '',
+          ),
+        })),
+      }
     },
   })
 
@@ -67,7 +82,7 @@ export default function SubscriptionPlansTable() {
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/subscription/${id}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/subscriptions/plans/${id}`,
         {
           method: 'DELETE',
           headers: { Authorization: `Bearer ${token}` },

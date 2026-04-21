@@ -22,7 +22,7 @@ export default function Subscription() {
         enabled: !!token,
         queryFn: async () => {
             const res = await fetch(
-                `${process.env.NEXT_PUBLIC_API_URL}/newsletter?page=${page}&limit=${limit}`,
+                `${process.env.NEXT_PUBLIC_API_URL}/newsletters?page=${page}&limit=${limit}`,
                 {
                     headers: {
                         'Content-Type': 'application/json',
@@ -35,7 +35,14 @@ export default function Subscription() {
                 throw new Error('Failed to fetch newsletters')
             }
 
-            return res.json()
+            const result = await res.json()
+            return {
+                ...result,
+                data: result.data.map((item: any) => ({
+                    _id: item.id,
+                    email: item.email,
+                })),
+            }
         },
     })
 
