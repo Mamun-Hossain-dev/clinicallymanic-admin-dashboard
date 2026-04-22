@@ -14,6 +14,7 @@ import { useSession } from 'next-auth/react'
 import { Plus, Search } from 'lucide-react'
 import { shopApi } from '@/lib/api/shopApi'
 import { Shop } from '@/types/shop'
+import { toast } from 'sonner'
 import { TableSkeleton } from '@/components/common/tableSkeleton'
 import { NoDataFound } from '@/components/common/no-data-found'
 
@@ -63,6 +64,12 @@ export default function ShopManagementPage() {
       queryClient.invalidateQueries({ queryKey: ['shops'] })
       setShowFormModal(false)
       setEditingShop(null)
+      toast.success(
+        editingShop ? 'Product updated successfully' : 'Product created successfully',
+      )
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Failed to save product')
     },
   })
 
@@ -75,6 +82,10 @@ export default function ShopManagementPage() {
       queryClient.invalidateQueries({ queryKey: ['shops'] })
       setShowDeleteModal(false)
       setDeletingShop(null)
+      toast.success('Product deleted successfully')
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Failed to delete product')
     },
   })
 
@@ -130,10 +141,8 @@ export default function ShopManagementPage() {
           className="px-4 py-2 bg-gray-800 border border-gray-700 rounded text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <option value="all">All Types</option>
+          <option value="standard">Standard</option>
           <option value="exclusive">Exclusive</option>
-          <option value="clothing">Clothing</option>
-          <option value="accessories">Accessories</option>
-          <option value="shoes">Shoes</option>
         </select>
 
         <select

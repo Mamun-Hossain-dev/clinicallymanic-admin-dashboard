@@ -9,7 +9,7 @@ export interface Shop {
   images: string[]
   size?: string[]
   price: number
-  type: 'exclusive' | 'clothing' | 'shoes' | 'accessories' | 'other'
+  type: 'standard' | 'exclusive'
   status: 'active' | 'inactive'
   details?: string
   categories: ('mens' | 'womens' | 'childrens' | 'accessories' | 'other')[]

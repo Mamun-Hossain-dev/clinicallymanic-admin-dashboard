@@ -85,7 +85,7 @@ export const ShopViewModal = ({
               <h4 className="text-base text-gray-400 mb-1">Type</h4>
               <span
                 className={`inline-block px-3 py-1 text-sm rounded-full ${
-                  (shop.type as string) === 'Exclusive'
+                  shop.type === 'exclusive'
                     ? 'bg-purple-600/20 text-purple-400'
                     : 'bg-blue-600/20 text-blue-400'
                 }`}

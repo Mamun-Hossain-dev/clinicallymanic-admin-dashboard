@@ -39,7 +39,11 @@ export interface ChangePasswordData {
 async function handleResponse<T>(response: Response): Promise<T> {
   if (!response.ok) {
     const error = await response.json().catch(() => ({}))
-    throw new Error(error.message || 'Something went wrong')
+    const formattedError = new Error(
+      error.message || 'Something went wrong',
+    ) as Error & { status?: number }
+    formattedError.status = response.status
+    throw formattedError
   }
   return response.json()
 }
@@ -65,6 +69,8 @@ export const useGetUserProfile = (accessToken: string, userId?: string) => {
       }
     },
     enabled: !!accessToken && !!userId,
+    staleTime: 5 * 60 * 1000,
+    refetchOnMount: false,
   })
 }
 

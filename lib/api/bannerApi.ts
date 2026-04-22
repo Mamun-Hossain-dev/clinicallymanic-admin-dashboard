@@ -29,12 +29,23 @@ const normalizeBanner = (banner: BackendBanner) => ({
   updatedAt: banner.updatedAt,
 })
 
+const handleResponseError = async (res: Response, fallbackMessage: string) => {
+  const payload = await res.json().catch(() => null)
+  const error = new Error(payload?.message || fallbackMessage) as Error & {
+    status?: number
+  }
+  error.status = res.status
+  throw error
+}
+
 export const bannerApi = {
   getAll: async (page = 1, limit = 10) => {
     const res = await fetch(
       `${API_BASE_URL}/banners?page=${page}&limit=${limit}`,
     )
-    if (!res.ok) throw new Error('Failed to fetch banners')
+    if (!res.ok) {
+      await handleResponseError(res, 'Failed to fetch banners')
+    }
     const response = await res.json()
     return {
       ...response,
@@ -44,7 +55,9 @@ export const bannerApi = {
 
   getById: async (id: string) => {
     const res = await fetch(`${API_BASE_URL}/banners/${id}`)
-    if (!res.ok) throw new Error('Failed to fetch banner')
+    if (!res.ok) {
+      await handleResponseError(res, 'Failed to fetch banner')
+    }
     const response = await res.json()
     return {
       ...response,
@@ -60,7 +73,9 @@ export const bannerApi = {
       },
       body: formData,
     })
-    if (!res.ok) throw new Error('Failed to create banner')
+    if (!res.ok) {
+      await handleResponseError(res, 'Failed to create banner')
+    }
     return res.json()
   },
 
@@ -72,7 +87,9 @@ export const bannerApi = {
       },
       body: formData,
     })
-    if (!res.ok) throw new Error('Failed to update banner')
+    if (!res.ok) {
+      await handleResponseError(res, 'Failed to update banner')
+    }
     return res.json()
   },
 
@@ -83,7 +100,9 @@ export const bannerApi = {
         Authorization: `Bearer ${token}`,
       },
     })
-    if (!res.ok) throw new Error('Failed to delete banner')
+    if (!res.ok) {
+      await handleResponseError(res, 'Failed to delete banner')
+    }
     return res.json()
   },
 }
