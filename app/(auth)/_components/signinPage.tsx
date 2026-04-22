@@ -2,7 +2,7 @@
 import React, { useState } from 'react'
 import { Eye, EyeOff } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { signIn } from 'next-auth/react'
+import { signIn, useSession } from 'next-auth/react'
 import { toast } from 'sonner'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
@@ -32,6 +32,7 @@ export default function SignInPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [rememberMe, setRememberMe] = useState(true)
   const router = useRouter()
+  const { data: session, status } = useSession()
 
   const form = useForm<SignInFormData>({
     resolver: zodResolver(signInSchema),
@@ -40,6 +41,15 @@ export default function SignInPage() {
       password: '',
     },
   })
+
+  React.useEffect(() => {
+    const role = String(session?.user?.role ?? '').toUpperCase()
+
+    if (status === 'authenticated' && role === 'ADMIN') {
+      router.replace('/admin-dashboard')
+      router.refresh()
+    }
+  }, [router, session?.user?.role, status])
 
   const onSubmit = async (values: SignInFormData) => {
     try {
@@ -61,6 +71,8 @@ export default function SignInPage() {
         // Handle specific error messages
         if (res.error.toLowerCase().includes('credentials')) {
           toast.error('Invalid email or password')
+        } else if (res.error.toLowerCase().includes('admin access only')) {
+          toast.error('Only admin accounts can sign in here')
         } else if (res.error.toLowerCase().includes('user not found')) {
           toast.error('No account found with this email')
         } else if (res.error.toLowerCase().includes('password')) {
@@ -73,7 +85,7 @@ export default function SignInPage() {
       }
 
       toast.success('Login successful! 🎉')
-      router.push('/admin-dashboard')
+      router.replace('/admin-dashboard')
       router.refresh()
     } catch (error: any) {
       console.error('Login error:', error)
@@ -97,7 +109,15 @@ export default function SignInPage() {
           </div>
 
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <form
+              action="#"
+              method="post"
+              onSubmit={event => {
+                event.preventDefault()
+                void form.handleSubmit(onSubmit)(event)
+              }}
+              className="space-y-6"
+            >
               <FormField
                 control={form.control}
                 name="email"

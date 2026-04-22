@@ -3,9 +3,13 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { useSession } from 'next-auth/react'
+import { useGetUserProfile } from '@/lib/api/profileApi'
 
 export function Topbar() {
   const { data: session, status } = useSession()
+  const accessToken = session?.user?.accessToken || ''
+  const userId = session?.user?.id
+  const { data: profileData } = useGetUserProfile(accessToken, userId)
 
   //  not authenticated → signin
   if (status === 'unauthenticated') {
@@ -26,7 +30,10 @@ export function Topbar() {
     return <div className="h-16" />
   }
 
-  const profileImage = session?.user?.profileImage || '/placeholder-user.jpg'
+  const profileImage =
+    profileData?.data?.profileImage ||
+    session?.user?.profileImage ||
+    '/placeholder-user.jpg'
   const userName = session?.user?.name || 'Admin'
 
   return (

@@ -2,19 +2,21 @@
 // File: app/banner-management/_components/BannerTable.tsx
 // ============================================
 
-import { Pencil, Trash2 } from 'lucide-react'
+import { Eye, Pencil, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import type { Banner } from '@/types/banner'
 import Image from 'next/image'
 
 interface BannerTableProps {
   banners: Banner[]
+  onView: (banner: Banner) => void
   onEdit: (banner: Banner) => void
   onDelete: (banner: Banner) => void
 }
 
 export const BannerTable = ({
   banners,
+  onView,
   onEdit,
   onDelete,
 }: BannerTableProps) => {
@@ -82,6 +84,14 @@ export const BannerTable = ({
               </td>
               <td className="px-6 py-4">
                 <div className="flex gap-2">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => onView(banner)}
+                    title="View"
+                  >
+                    <Eye className="h-5 w-5 text-emerald-400" />
+                  </Button>
                   <Button
                     variant="ghost"
                     size="icon"

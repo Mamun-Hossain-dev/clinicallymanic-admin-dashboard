@@ -89,9 +89,9 @@ export const useUpdateProfile = (
 
       return handleResponse<ProfileResponse>(res)
     },
-    onSuccess: () => {
+    onSuccess: response => {
       queryClient.invalidateQueries({ queryKey: ['user-profile'] })
-      options?.onSuccess?.()
+      options?.onSuccess?.(response)
     },
     onError: error => {
       options?.onError?.(error)
@@ -126,9 +126,9 @@ export const useUpdateProfileImage = (
         },
       }
     },
-    onSuccess: () => {
+    onSuccess: response => {
       queryClient.invalidateQueries({ queryKey: ['user-profile'] })
-      options?.onSuccess?.()
+      options?.onSuccess?.(response)
     },
     onError: error => {
       options?.onError?.(error)

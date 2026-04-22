@@ -29,10 +29,16 @@ const authOptions: AuthOptions = {
 
           if (!res.ok || !data?.data?.accessToken) return null
 
+          const role = String(data.data.user.role ?? '').toUpperCase()
+
+          if (role !== 'ADMIN') {
+            throw new Error('Admin access only')
+          }
+
           return {
             id: data.data.user.id,
             email: data.data.user.email,
-            role: data.data.user.role,
+            role,
             accessToken: data.data.accessToken,
             profileImage: data.data.user.profileImage,
           }
@@ -49,15 +55,23 @@ const authOptions: AuthOptions = {
   },
 
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
       if (user) {
+        const role = String(user.role ?? '').toUpperCase()
         token.id = user.id
         token.email = user.email
-        token.role = user.role
+        token.role = role
         token.accessToken = user.accessToken
         token.refreshToken = user.refreshToken
         token.profileImage = user.profileImage
       }
+
+      if (trigger === 'update') {
+        if (session?.user?.profileImage) {
+          token.profileImage = session.user.profileImage
+        }
+      }
+
       return token
     },
 
@@ -65,7 +79,7 @@ const authOptions: AuthOptions = {
       session.user = {
         id: token.id as string,
         email: token.email as string,
-        role: token.role as string,
+        role: String(token.role ?? '').toUpperCase(),
         accessToken: token.accessToken as string,
         refreshToken: token.refreshToken as string,
         profileImage: token.profileImage as string,

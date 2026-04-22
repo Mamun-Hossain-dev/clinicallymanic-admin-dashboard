@@ -70,9 +70,10 @@ export const BannerFormModal = ({
     const data = new FormData()
     data.append('title', formData.title)
     data.append('description', formData.description)
-    data.append('type', formData.type)
+    data.append('category', formData.type)
+    data.append('status', 'ACTIVE')
     if (formData.image) {
-      data.append('image', formData.image)
+      data.append('bannerImage', formData.image)
     }
     onSubmit(data)
   }
