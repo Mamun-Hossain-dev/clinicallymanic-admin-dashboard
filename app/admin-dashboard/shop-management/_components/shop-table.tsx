@@ -85,11 +85,7 @@ export const ShopTable = ({
                   className={`px-3 py-1 text-sm rounded-full ${
                     shop.type.toLowerCase() === 'exclusive'
                       ? 'bg-purple-600/20 text-purple-400'
-                      : shop.type.toLowerCase() === 'clothing'
-                      ? 'bg-blue-600/20 text-blue-400'
-                      : shop.type.toLowerCase() === 'shoes'
-                      ? 'bg-green-600/20 text-green-400'
-                      : 'bg-gray-600/20 text-gray-400'
+                      : 'bg-blue-600/20 text-blue-400'
                   }`}
                 >
                   {shop.type}

@@ -27,12 +27,7 @@ export const ShopFormModal = ({
     title: '',
     description: '',
     price: '',
-    type: 'exclusive' as
-      | 'exclusive'
-      | 'clothing'
-      | 'shoes'
-      | 'accessories'
-      | 'other',
+    type: 'exclusive' as 'standard' | 'exclusive',
     details: '',
     status: 'active' as 'active' | 'inactive',
     images: [] as File[],
@@ -90,30 +85,25 @@ export const ShopFormModal = ({
     }
 
     const data = new FormData()
+    const payload: Record<string, unknown> = {
+      title: formData.title.trim(),
+      description: formData.description.trim(),
+      price: Number(formData.price),
+      type: formData.type.toUpperCase(),
+      status: formData.status.toUpperCase(),
+      categories: categories.map(category => category.toUpperCase()),
+      sizes,
+    }
 
     if (formData.name.trim()) {
-      data.append('name', formData.name)
+      payload.name = formData.name.trim()
     }
-
-    data.append('title', formData.title)
-    data.append('description', formData.description)
-    data.append('price', formData.price)
-    data.append('type', formData.type)
-    data.append('status', formData.status)
 
     if (formData.details.trim()) {
-      data.append('details', formData.details)
+      payload.details = formData.details.trim()
     }
 
-    if (sizes.length > 0) {
-      data.append('size', JSON.stringify(sizes))
-    }
-
-    data.append('categories', JSON.stringify(categories))
-
-    if (shop && existingImages.length > 0) {
-      data.append('existingImages', JSON.stringify(existingImages))
-    }
+    data.append('data', JSON.stringify(payload))
 
     formData.images.forEach(img => {
       data.append('images', img)
@@ -128,10 +118,6 @@ export const ShopFormModal = ({
 
     const urls = files.map(file => URL.createObjectURL(file))
     setPreviewImages(urls)
-  }
-
-  const removeExistingImage = (index: number) => {
-    setExistingImages(existingImages.filter((_, i) => i !== index))
   }
 
   const removeNewImage = (index: number) => {
@@ -167,12 +153,9 @@ export const ShopFormModal = ({
     'other',
   ]
   const typeOptions: (
+    | 'standard'
     | 'exclusive'
-    | 'clothing'
-    | 'shoes'
-    | 'accessories'
-    | 'other'
-  )[] = ['exclusive', 'clothing', 'shoes', 'accessories', 'other']
+  )[] = ['standard', 'exclusive']
 
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 overflow-y-auto p-4">
@@ -427,14 +410,6 @@ export const ShopFormModal = ({
                         className="object-cover"
                         unoptimized
                       />
-                      <button
-                        type="button"
-                        onClick={() => removeExistingImage(idx)}
-                        disabled={loading}
-                        className="absolute top-1 right-1 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        <X className="h-3 w-3" />
-                      </button>
                     </div>
                   ))}
                 </div>

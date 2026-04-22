@@ -3,6 +3,11 @@
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1'
 
+const handleResponseError = async (res: Response, fallbackMessage: string) => {
+  const payload = await res.json().catch(() => null)
+  throw new Error(payload?.message || fallbackMessage)
+}
+
 const normalizeShop = (shop: any) => ({
   _id: shop.id,
   name: shop.name,
@@ -53,7 +58,7 @@ export const shopApi = {
       },
       body: formData,
     })
-    if (!res.ok) throw new Error('Failed to create shop')
+    if (!res.ok) await handleResponseError(res, 'Failed to create shop')
     return res.json()
   },
 
@@ -65,7 +70,7 @@ export const shopApi = {
       },
       body: formData,
     })
-    if (!res.ok) throw new Error('Failed to update shop')
+    if (!res.ok) await handleResponseError(res, 'Failed to update shop')
     return res.json()
   },
 
@@ -76,7 +81,7 @@ export const shopApi = {
         Authorization: `Bearer ${token}`,
       },
     })
-    if (!res.ok) throw new Error('Failed to delete shop')
+    if (!res.ok) await handleResponseError(res, 'Failed to delete shop')
     return res.json()
   },
 }

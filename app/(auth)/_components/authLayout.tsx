@@ -12,7 +12,8 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
       <div
         className="absolute inset-0 bg-cover bg-center"
         style={{
-          backgroundImage: `url('/Bg.png')`,
+          backgroundImage:
+            "radial-gradient(circle at top, rgba(255,255,255,0.16), transparent 35%), linear-gradient(135deg, #050505 0%, #161616 45%, #050505 100%)",
           filter: 'brightness(0.4)',
         }}
       />

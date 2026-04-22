@@ -12,6 +12,8 @@ export const useBanners = (page: number, limit: number) => {
   return useQuery<ApiResponse<Banner[]>>({
     queryKey: ['banners', page, limit],
     queryFn: () => bannerApi.getAll(page, limit),
+    staleTime: 30_000,
+    refetchOnMount: false,
   })
 }
 
@@ -20,6 +22,7 @@ export const useBanner = (id: string) => {
     queryKey: ['banner', id],
     queryFn: () => bannerApi.getById(id),
     enabled: !!id,
+    staleTime: 30_000,
   })
 }
 

@@ -45,9 +45,6 @@ export default function SettingsPage() {
     refetch: refetchProfile,
   } = useGetUserProfile(accessToken, userId)
 
-  console.log('Profile data', profileData)
-  console.log('profile image', profileImage)
-
   const { mutate: updateProfile, isPending: isUpdatingProfile } =
     useUpdateProfile(accessToken, userId, {
       onSuccess: async () => {
