@@ -61,9 +61,16 @@ export default function SettingsPage() {
 
   const { mutate: updateProfileImage, isPending: isUpdatingImage } =
     useUpdateProfileImage(accessToken, userId, {
-      onSuccess: async () => {
+      onSuccess: async (response: { data?: { profileImage?: string } }) => {
+        const nextProfileImage = response?.data?.profileImage || imagePreview
+
         toast.success('Profile image updated successfully ✅')
         setImageFile(null)
+        setProfileImage(nextProfileImage)
+        setImagePreview(nextProfileImage)
+        await updateSession({
+          profileImage: nextProfileImage,
+        })
         await refetchProfile()
       },
       onError: (error: Error) =>

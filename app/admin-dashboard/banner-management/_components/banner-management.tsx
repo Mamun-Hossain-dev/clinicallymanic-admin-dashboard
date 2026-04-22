@@ -21,6 +21,7 @@ import { BannerTable } from './banner-table'
 import { Pagination } from '@/components/common/table-pagination'
 import { BannerFormModal } from './banner-form'
 import { DeleteModal } from '@/components/common/delete-modal'
+import { BannerViewModal } from './banner-view-modal'
 
 export default function BannerManagementPage() {
   const { data: session } = useSession()
@@ -30,7 +31,9 @@ export default function BannerManagementPage() {
 
   const [showFormModal, setShowFormModal] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [showViewModal, setShowViewModal] = useState(false)
   const [editingBanner, setEditingBanner] = useState<Banner | null>(null)
+  const [viewingBanner, setViewingBanner] = useState<Banner | null>(null)
   const [deletingBanner, setDeletingBanner] = useState<{
     id: string
     title: string
@@ -70,6 +73,11 @@ export default function BannerManagementPage() {
   const handleEdit = (banner: Banner) => {
     setEditingBanner(banner)
     setShowFormModal(true)
+  }
+
+  const handleView = (banner: Banner) => {
+    setViewingBanner(banner)
+    setShowViewModal(true)
   }
 
   const handleDeleteClick = (banner: Banner) => {
@@ -144,6 +152,7 @@ export default function BannerManagementPage() {
             <>
               <BannerTable
                 banners={filteredBanners}
+                onView={handleView}
                 onEdit={handleEdit}
                 onDelete={handleDeleteClick}
               />
@@ -180,6 +189,15 @@ export default function BannerManagementPage() {
           onConfirm={handleDelete}
           title={deletingBanner?.title || ''}
           // isLoading={deleteBanner.isPending}
+        />
+
+        <BannerViewModal
+          isOpen={showViewModal}
+          onClose={() => {
+            setShowViewModal(false)
+            setViewingBanner(null)
+          }}
+          banner={viewingBanner}
         />
       </div>
     </div>

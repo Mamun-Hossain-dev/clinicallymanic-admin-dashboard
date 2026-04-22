@@ -6,7 +6,9 @@ export async function middleware(request: NextRequest) {
         req: request,
         secret: process.env.NEXTAUTH_SECRET,
     });
-    if (!token || token?.role !== "admin") {
+    const role = String(token?.role ?? '').toUpperCase()
+
+    if (!token || role !== "ADMIN") {
         return NextResponse.redirect(new URL("/signin", request.url));
     }
 

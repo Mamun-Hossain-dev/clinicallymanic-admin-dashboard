@@ -32,8 +32,11 @@ export const useCreateBanner = () => {
       const token = session?.user?.accessToken || ''
       return bannerApi.create(formData, token)
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['banners'] })
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: ['banners'],
+        refetchType: 'all',
+      })
     },
   })
 }
@@ -47,8 +50,14 @@ export const useUpdateBanner = () => {
       const token = session?.user?.accessToken || ''
       return bannerApi.update(id, formData, token)
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['banners'] })
+    onSuccess: async (_response, variables) => {
+      await queryClient.invalidateQueries({
+        queryKey: ['banners'],
+        refetchType: 'all',
+      })
+      await queryClient.invalidateQueries({
+        queryKey: ['banner', variables.id],
+      })
     },
   })
 }
@@ -62,8 +71,11 @@ export const useDeleteBanner = () => {
       const token = session?.user?.accessToken || ''
       return bannerApi.delete(id, token)
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['banners'] })
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: ['banners'],
+        refetchType: 'all',
+      })
     },
   })
 }
