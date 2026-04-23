@@ -1,7 +1,7 @@
 'use client'
 
 import dynamic from 'next/dynamic'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useSession } from 'next-auth/react'
 import { useQuery } from '@tanstack/react-query'
 import { StatCard } from '@/components/reusable/stat-card'
@@ -22,40 +22,67 @@ const DashboardCharts = dynamic(() => import('./dashboard-charts'), {
 })
 
 export default function DashboardPage() {
-  const { data: session } = useSession()
+  const { data: session, status } = useSession()
   const token = session?.user?.accessToken || ''
   const currentYear = new Date().getFullYear()
   const [selectedYear, setSelectedYear] = useState(currentYear)
+  const [loadSecondaryData, setLoadSecondaryData] = useState(false)
 
   // Generate year options (current year and past 4 years)
   const yearOptions = Array.from({ length: 5 }, (_, i) => currentYear - i)
+
+  useEffect(() => {
+    if (!token) {
+      setLoadSecondaryData(false)
+      return
+    }
+
+    const idleCallback = window.requestIdleCallback?.(() =>
+      setLoadSecondaryData(true),
+    )
+
+    if (idleCallback) {
+      return () => window.cancelIdleCallback?.(idleCallback)
+    }
+
+    const timeoutId = window.setTimeout(() => setLoadSecondaryData(true), 250)
+    return () => window.clearTimeout(timeoutId)
+  }, [token])
 
   // Fetch Dashboard Overview
   const { data: overview, isLoading: overviewLoading } = useQuery({
     queryKey: ['dashboard-overview'],
     queryFn: () => dashboardApi.getOverview(token),
-    enabled: !!token,
+    enabled: status === 'authenticated' && !!token,
+    staleTime: 5 * 60 * 1000,
+    refetchOnMount: false,
   })
 
   // Fetch Revenue Overview
   const { data: revenueData, isLoading: revenueLoading } = useQuery({
     queryKey: ['revenue-overview', selectedYear],
     queryFn: () => dashboardApi.getRevenueOverview(selectedYear, token),
-    enabled: !!token,
+    enabled: loadSecondaryData && !!token,
+    staleTime: 5 * 60 * 1000,
+    refetchOnMount: false,
   })
 
   // Fetch User Growth
   const { data: userGrowthData, isLoading: userGrowthLoading } = useQuery({
     queryKey: ['user-growth'],
     queryFn: () => dashboardApi.getUserGrowth(token),
-    enabled: !!token,
+    enabled: loadSecondaryData && !!token,
+    staleTime: 5 * 60 * 1000,
+    refetchOnMount: false,
   })
 
   // Fetch Latest Contacts
   const { data: latestContacts, isLoading: contactsLoading } = useQuery({
     queryKey: ['latest-contacts'],
     queryFn: () => dashboardApi.getLatestContacts(token),
-    enabled: !!token,
+    enabled: loadSecondaryData && !!token,
+    staleTime: 2 * 60 * 1000,
+    refetchOnMount: false,
   })
 
   // Format currency
